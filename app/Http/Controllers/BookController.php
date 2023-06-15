@@ -54,13 +54,17 @@ class BookController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Book $book)
+    public function show(Book $book) // Route Model Binding will make this cache useless, just for testing
     {
-        return view('books.show', ['book' => $book->load(
+        $cacheKey = 'books.' . $book->id . '.reviews';
+
+        $book = cache()->remember($cacheKey, 3600, fn () => $book->load(
             [
                 'reviews' => fn ($query) => $query->latest()
             ]
-        )]);
+        ));
+
+        return view('books.show', ['book' => $book]);
     }
 
     /**
